@@ -24,7 +24,6 @@ class ComfyUI:
     def start_server(self, output_directory, input_directory):
         self.input_directory = input_directory
         self.output_directory = output_directory
-        self.download_pre_start_models()
 
         start_time = time.time()
         server_thread = threading.Thread(
@@ -56,10 +55,6 @@ class ComfyUI:
         except URLError:
             return False
 
-    def download_pre_start_models(self):
-        # Some models need to be downloaded and loaded before starting ComfyUI
-        self.weights_downloader.download_torch_checkpoints()
-
     def apply_helper_methods(self, method_name, *args, **kwargs):
         # Dynamically applies a method from helpers module with given args.
         # Example usage: self.apply_helper_methods("add_weights", weights_to_download, node)
@@ -69,11 +64,10 @@ class ComfyUI:
             if callable(method):
                 method(*args, **kwargs)
 
-    def handle_weights(self, workflow):
+    def handle_weights(self, workflow, weights_to_download=[]):
         print("Checking weights")
         embeddings = self.weights_downloader.get_weights_by_type("EMBEDDINGS")
         embedding_to_fullname = {emb.split(".")[0]: emb for emb in embeddings}
-        weights_to_download = []
         weights_filetypes = self.weights_downloader.supported_filetypes
 
         for node in workflow.values():
