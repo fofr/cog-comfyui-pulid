@@ -38,12 +38,3 @@ for repo in repos:
         os.chdir(current_dir)
     else:
         print(f"Skipping clone for {repo_name}, directory already exists")
-
-# Copy the was_suite_config.json to the appropriate directory
-subprocess.run(
-    [
-        "cp",
-        "custom_node_configs/was_suite_config.json",
-        os.path.join(dest_dir, "was-node-suite-comfyui/"),
-    ]
-)
