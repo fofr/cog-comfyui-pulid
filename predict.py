@@ -22,14 +22,7 @@ class Predictor(BasePredictor):
 
         with open("pulid_api.json", "r") as file:
             workflow = json.loads(file.read())
-        self.comfyUI.handle_weights(
-            workflow,
-            weights_to_download=[
-                "dreamshaperXL_lightningDPMSDE.safetensors",
-                "ProteusV0.4-Lighting.safetensors",
-                "Juggernaut_RunDiffusionPhoto2_Lightning_4Steps.safetensors",
-            ],
-        )
+        self.comfyUI.handle_weights(workflow)
 
     def cleanup(self):
         self.comfyUI.clear_queue()
@@ -76,14 +69,19 @@ class Predictor(BasePredictor):
 
     def set_weights(self, workflow, model: str):
         loader = workflow["4"]["inputs"]
-        if model == "default":
-            loader["ckpt_name"] = "dreamshaperXL_lightningDPMSDE.safetensors"
-        elif model == "artistic":
-            loader["ckpt_name"] = "ProteusV0.4-Lighting.safetensors"
-        elif model == "realistic":
-            loader["ckpt_name"] = (
-                "Juggernaut_RunDiffusionPhoto2_Lightning_4Steps.safetensors"
-            )
+        model_map = {
+            "general - albedobaseXL_v21": "albedobaseXL_v21.safetensors",
+            "general - dreamshaperXL_alpha2Xl10": "dreamshaperXL_alpha2Xl10.safetensors",
+            "animated - starlightXLAnimated_v3": "starlightXLAnimated_v3.safetensors",
+            "animated - pixlAnimeCartoonComic_v10": "pixlAnimeCartoonComic_v10.safetensors",
+            "realistic - rundiffusionXL_beta": "rundiffusionXL_beta.safetensors",
+            "realistic - RealVisXL_V4.0": "RealVisXL_V4.0.safetensors",
+            "realistic - sdxlUnstableDiffusers_nihilmania": "sdxlUnstableDiffusers_nihilmania.safetensors",
+            "cinematic - CinematicRedmond": "CinematicRedmond.safetensors",
+        }
+
+        if model in model_map:
+            loader["ckpt_name"] = model_map[model]
 
     def update_workflow(self, workflow, **kwargs):
         self.set_weights(workflow, kwargs["model"])
@@ -127,8 +125,17 @@ class Predictor(BasePredictor):
         ),
         checkpoint_model: str = Input(
             description="Model to use for the generation",
-            choices=["default", "artistic", "realistic"],
-            default="default",
+            choices=[
+                "general - albedobaseXL_v21",
+                "general - dreamshaperXL_alpha2Xl10",
+                "animated - starlightXLAnimated_v3",
+                "animated - pixlAnimeCartoonComic_v10",
+                "realistic - rundiffusionXL_beta",
+                "realistic - RealVisXL_V4.0",
+                "realistic - sdxlUnstableDiffusers_nihilmania",
+                "cinematic - CinematicRedmond",
+            ],
+            default="general - dreamshaperXL_alpha2Xl10",
         ),
         face_style: str = Input(
             description="Style of the face",
